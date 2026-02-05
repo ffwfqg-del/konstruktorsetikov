@@ -572,6 +572,9 @@ body {
 
 .nashivki-modal {
     max-width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .button-container {
@@ -727,6 +730,7 @@ body {
     max-height: 500px;
     overflow-y: auto;
     padding-bottom: 15px;
+    justify-content: center;
 }
 
 .modal-sets {

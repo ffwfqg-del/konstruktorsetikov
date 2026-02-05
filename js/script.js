@@ -514,9 +514,20 @@ function getNashivkaInfo(type) {
 
 const skins = [
     {
+        imageSrc: `${basePath}imgs/skins/friren.webp`,
+        yellow: { armourmax: 50, deff: 2, damage: 2, otrazh: 3 },
+        ru_name: 'Фрирен',
+        skinZatochka: true
+    },
+    {
         imageSrc: `${basePath}imgs/skins/spacefarmer.png`,
         yellow: { deff: 2, damage: 2, otrazh: 3, armourmax: 50 },
         ru_name: 'Космический Фермер'
+    },
+    {
+        imageSrc: `${basePath}imgs/skins/werewolf.png`,
+        yellow: { deff: 2, damage: 2, otrazh: 3, armourmax: 50 },
+        ru_name: 'Оборотень'
     },
     {
         imageSrc: `${basePath}imgs/skins/sydney.png`,
@@ -647,12 +658,6 @@ const skins = [
         imageSrc: `${basePath}imgs/skins/skuf.png`,
         yellow: { deff: 2, damage: 2, otrazh: 3 },
         ru_name: 'Скуф'
-    },
-    {
-        imageSrc: `${basePath}imgs/skins/friren.webp`,
-        yellow: { armourmax: 50, deff: 2, damage: 2, otrazh: 3 },
-        ru_name: 'Фрирен',
-        skinZatochka: true
     },
 ];
 
@@ -1782,6 +1787,7 @@ document.querySelectorAll('.mini-container img').forEach(img => {
 
 var current_item;
 var itemForNashivka;
+var nashivkaModalCurrentSlot = null;
 
 function addAccs(slot_name, imgHtml) {
     var item = $(`.grid-item#${slot_name}`).get(0);
@@ -3327,11 +3333,15 @@ $(document).ready(function () {
         container.empty();
         var gridItem = $(this).closest('.grid-item');
         var item_slot = gridItem.attr('id');
+        nashivkaModalCurrentSlot = item_slot;
         // Ищем и img.main, и img.main-accs, чтобы кнопка работала в любом случае
         var item_ = gridItem.find('img.main')[0] || gridItem.find('img.main-accs')[0];
 
         nashivki.forEach((nashivka, i) => {
-            if (nashivka.slot == item_slot || nashivka.slot == 'all') {
+            var showForSlot = (item_slot === 'armour')
+                ? (nashivka.slot === 'armour')
+                : (nashivka.slot == item_slot || nashivka.slot == 'all');
+            if (showForSlot) {
                 let statsHtml = '';
                 for (const stat in nashivka.stats) {
                     if (RuTypes[stat]) {
@@ -3406,6 +3416,17 @@ $(document).ready(function () {
     const modalNashivkaOverlay = document.getElementById('modalNashivkaOverlay');
 
     closeNashivkaModalButton.addEventListener('click', () => {
+        if (nashivkaModalCurrentSlot) {
+            var $gridItem = $(`.grid-item#${nashivkaModalCurrentSlot}`);
+            var item = $gridItem.find('img.main')[0] || $gridItem.find('img.main-accs')[0];
+            if (item) {
+                delete item.dataset.nashivka;
+                $gridItem.find('img.nashivka').remove();
+                $gridItem.find('.tooltip').text($gridItem.attr('ru-name'));
+                updateStats();
+            }
+            nashivkaModalCurrentSlot = null;
+        }
         modalNashivkaOverlay.style.display = 'none';
 
         var modalNashivki = document.querySelector('.modal-nashivki');
@@ -3415,6 +3436,7 @@ $(document).ready(function () {
     });
 
     closeNashivkaModalXButton.addEventListener('click', () => {
+        nashivkaModalCurrentSlot = null;
         modalNashivkaOverlay.style.display = 'none';
 
         var modalNashivki = document.querySelector('.modal-nashivki');
@@ -3429,6 +3451,7 @@ $(document).ready(function () {
         container.empty();
         var gridItem = $(this).closest('.grid-item');
         var item_slot = gridItem.attr('id');
+        nashivkaModalCurrentSlot = item_slot;
         var item_ = gridItem.find('img.main-accs')[0];
 
         // console.log(1, gridItem)
