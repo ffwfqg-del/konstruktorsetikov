@@ -648,6 +648,12 @@ const skins = [
         yellow: { deff: 2, damage: 2, otrazh: 3 },
         ru_name: 'Скуф'
     },
+    {
+        imageSrc: `${basePath}imgs/skins/friren.webp`,
+        yellow: { armourmax: 50, deff: 2, damage: 2, otrazh: 3 },
+        ru_name: 'Фрирен',
+        skinZatochka: true
+    },
 ];
 
 function getSkinInfoByRuName(ru_name) {
@@ -1306,7 +1312,7 @@ function getSlotNameFromItem(item) {
 }
 
 function getSkinNameFromSrc(src) {
-    const match = src.match(/\/skins\/([^/.]+)\.png$/);
+    const match = src.match(/\/skins\/([^/.]+)\.(png|webp)$/);
     return match ? match[1] : null;
 }
 
@@ -3236,11 +3242,59 @@ $(document).ready(function () {
         const skin = skins[index];
         $('#character-image').attr('src', skin.imageSrc);
         selectedSkin = skin;
-        selectedSkinYellowTransfer = null; // Сбрасываем перенос при выборе нового скина
+        if (!skin.skinZatochka) {
+            selectedSkinYellowTransfer = null;
+        } else if (!selectedSkinYellowTransfer || typeof selectedSkinYellowTransfer.opyan !== 'number' || typeof selectedSkinYellowTransfer.neoglysh !== 'number') {
+            selectedSkinYellowTransfer = null;
+        }
         $('#modalSkinsOverlay').fadeOut(200, function () {
             $(this).css('display', 'none');
-            // После закрытия окна выбора скина показываем окно переноса характеристик
-            showSkinPereshiv();
+            if (skin.skinZatochka) {
+                var savedLevel = (selectedSkinYellowTransfer && typeof selectedSkinYellowTransfer.opyan === 'number') ? selectedSkinYellowTransfer.opyan : 0;
+                $('#frirenZatochkaRange').val(Math.min(12, Math.max(0, savedLevel)));
+                $('#frirenZatochkaValue').text($('#frirenZatochkaRange').val());
+                $('#modalFrirenZatochkaOverlay').css('display', 'flex').hide().fadeIn(200);
+            } else {
+                showSkinPereshiv();
+            }
+        });
+    });
+
+    $('#frirenZatochkaRange').on('input', function () {
+        $('#frirenZatochkaValue').text($(this).val());
+    });
+
+    $('#confirmFrirenZatochka').on('click', function () {
+        var level = parseInt($('#frirenZatochkaRange').val(), 10) || 0;
+        level = Math.min(12, Math.max(0, level));
+        var baseYellow = getSkinInfoByRuName('Фрирен').yellow;
+        selectedSkinYellowTransfer = {
+            armourmax: baseYellow.armourmax || 0,
+            deff: baseYellow.deff || 0,
+            damage: baseYellow.damage || 0,
+            otrazh: baseYellow.otrazh || 0,
+            opyan: level,
+            neoglysh: level
+        };
+        $('#modalFrirenZatochkaOverlay').fadeOut(200, function () {
+            $(this).css('display', 'none');
+            updateStats();
+        });
+    });
+
+    $('#closeXModalFrirenZatochka').on('click', function () {
+        var baseYellow = getSkinInfoByRuName('Фрирен').yellow;
+        selectedSkinYellowTransfer = {
+            armourmax: baseYellow.armourmax || 0,
+            deff: baseYellow.deff || 0,
+            damage: baseYellow.damage || 0,
+            otrazh: baseYellow.otrazh || 0,
+            opyan: 0,
+            neoglysh: 0
+        };
+        $('#modalFrirenZatochkaOverlay').fadeOut(200, function () {
+            $(this).css('display', 'none');
+            updateStats();
         });
     });
 
